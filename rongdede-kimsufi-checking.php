@@ -11,7 +11,7 @@ Text Domain: 91yun.org
 require_once("function.php");
 
 
-class rongdedekimsuficheck extends RKSTT{
+class rongdedekimsuficheck{
 	
 	//析构函数
 	function __construct() {
@@ -49,12 +49,6 @@ function check_page($text){
 			}
 			$text = $text."<script type='text/javascript' src='".plugins_url( "kimsufi-check.js?ver=201511190415", __FILE__ )."'></script>";
 			$text = $text."<link rel='stylesheet' href='".plugins_url( "kimsufi-check.css", __FILE__ )."' type='text/css'>";
-			if($rongdedestockoption == "ajax"){
-				$text = $text."<script>var duration=90000;</script>";
-			}
-			else{
-				$text = $text."<script>var duration=10000;</script>";
-			}			
 			$text = $text."<script>var ajaxurl='".admin_url('admin-ajax.php')."';</script>";
 			$text = $text."<audio id='mp3' controls='controls'>";
 			$text = $text."<source src='".plugins_url( 'Anaconda.mp3', __FILE__ )."' type='audio/mpeg'>";
@@ -98,6 +92,35 @@ function check_page($text){
 }
 
 
+function url_get_contents($strUrl, $boolUseCookie=false)  
+{  
+    $ch = curl_init($strUrl);  
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($ch, CURLOPT_HEADER, 0);  
+    curl_setopt($ch, CURLOPT_TIMEOUT, 50);  
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 50);  
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  
+    curl_setopt($ch, CURLOPT_HTTPGET, true);   
+    curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);  
+    curl_setopt($ch, CURLOPT_REFERER, $_SERVER['HTTP_REFERER']);   
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);  
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);  
+    if ($boolUseCookie && is_array($_COOKIE) && count($_COOKIE) > 0) {  
+        $cookie_str = '';  
+        foreach($_COOKIE as $key => $value) {  
+            $cookie_str .= "$key=$value; ";   
+        }  
+        curl_setopt($ch, CURLOPT_COOKIE, $cookie_str);  
+    }  
+    $response = curl_exec($ch);  
+		return $response;
+
+    if (curl_errno($ch) != 0) {  
+        return false;  
+    }  
+    curl_close($ch);  
+    return $response;     
+}  
 
 
 //检查是否有货的ajax
@@ -125,23 +148,100 @@ function check_page($text){
 		$rongdedekimsufioptionarr = get_option("rongdedekimsufioption")?get_option("rongdedekimsufioption"):array("checktype"=>"ajax");
 		$rongdedekimsufioption = $rongdedekimsufioptionarr["checktype"];
 		if($rongdedekimsufioption == "ajax"){
-			@$status = parent::matchstock($url);
-			parent::soldoutlog($id,$dt,$status);
-			parent::echoresult($status,$dt,date("Y-m-d H:i:s"));
+			//读取源代码
+			//$page = file_get_contents($url);
+			$page = $this->url_get_contents($url);
+			if ($matchtype=="regex"){
+				$ismatch = preg_match($matchcontent,$page);
+			}
+			else
+			{
+				$ismatch = strstr($page,$matchcontent);
+			}
+		//echo "ddd";
+			if($ismatch){
+				if($yesorno){
+					$this->soldoutlog($id,$dt,"havegoods");
+					echo "havegoods";
+					echo "||";
+					echo $dt;
+					echo "||";
+					echo date("Y-m-d H:i:s");
+					echo "||";
+				}
+				else
+				{
+					$this->soldoutlog($id,$dt,"soldout");
+					echo "soldout";
+					echo "||";
+					echo "";
+					echo "||";
+					echo date("Y-m-d H:i:s");
+					echo "||";
+				}
+			
+			}
+			else
+			{
+				if($yesorno)
+				{
+					$this->soldoutlog($id,$dt,"soldout");
+					echo "soldout";
+					echo "||";
+					echo "";
+					echo "||";
+					echo date("Y-m-d H:i:s");
+					echo "||";
+				}
+				else
+				{
+					$this->soldoutlog($id,$dt,"havegoods");
+					echo "havegoods";
+					echo "||";
+					echo $dt;
+					echo "||";
+					echo date("Y-m-d H:i:s");
+					echo "||";
+				}
+				
+			}
 		}
 		elseif($rongdedekimsufioption == "91yun"){
-			$page = parent::url_get_contents("http://www.91yun.org/wp-content/plugins/rongdede-kimsufi-checking/91yun-kimsufi-checking.php?url=".urlencode($url));
+			$page = $this->url_get_contents("http://www.91yun.org/wp-content/plugins/rongdede-kimsufi-checking/91yun-kimsufi-checking.php?url=".urlencode($url));
 			echo $page;
 			
 		}
 		elseif($rongdedekimsufioption == "back"){
 			$r = $wpdb->get_row("select * from ".RKSTABLE." where id='".$id."'");
-			parent::echoresult($r->status,$r->dateandtime,$r->checkdt);
+			echo $r->status;
+			echo "||";
+			if(null == $r->dateandtime){
+				echo " ";
+			}
+			else{
+				echo $r->dateandtime;
+			}
+			echo "||";
+			echo $r->checkdt;
+			echo "||";
+		}
 
 
 
 	}
 
+	//有货记录数据库
+	function soldoutlog($id,$dt,$status){
+		global $wpdb;
+		if($status == "havegoods"){
+			$log = array("dateandtime"=>$dt,"checkdt"=>date("Y-m-d H:i:s"),"status"=>$status);
+			
+		}
+		elseif($status == "soldout"){
+			$log = array("checkdt"=>date("Y-m-d H:i:s"),"status"=>$status);
+		}
+		$wpdb->update(RKSTABLE,$log,array("id"=>$id));
+	}
 
 
 		//插件激活时执行的内容

@@ -1,0 +1,65 @@
+{
+
+"france":[
+
+	{
+		"name":"ks1",
+		"url":"https://www.kimsufi.com/en/order/kimsufi.cgi?hard=150sk10",
+		"content":"id=\"aButtonValidation\"",
+		"issoldout":"1",
+		"matchtype":"str",
+		"tag":"kimsufi"
+	},
+
+	{
+		"name":"ks2",
+		"url":"https://www.kimsufi.com/en/order/kimsufi.cgi?hard=150sk20",
+		"content":"id=\"aButtonValidation\"",
+		"issoldout":"1",
+		"matchtype":"str",
+		"tag":"kimsufi"
+	},
+	{
+		"name":"ks2ssd",
+		"url":"https://www.kimsufi.com/en/order/kimsufi.cgi?hard=150sk22",
+		"content":"id=\"aButtonValidation\"",
+		"issoldout":"1",
+		"matchtype":"str",
+		"tag":"kimsufi"
+	},
+	{
+		"name":"ks3",
+		"url":"https://www.kimsufi.com/en/order/kimsufi.cgi?hard=150sk30",
+		"content":"id=\"aButtonValidation\"",
+		"issoldout":"1",
+		"matchtype":"str",
+		"tag":"kimsufi"
+	},
+	{
+		"name":"ks4",
+		"url":"https://www.kimsufi.com/en/order/kimsufi.cgi?hard=150sk40",
+		"content":"id=\"aButtonValidation\"",
+		"issoldout":"1",
+		"matchtype":"str",
+		"tag":"kimsufi"
+	},
+	{
+		"name":"ks5",
+		"url":"https://www.kimsufi.com/en/order/kimsufi.cgi?hard=150sk50",
+		"content":"id=\"aButtonValidation\"",
+		"issoldout":"1",
+		"matchtype":"str",
+		"tag":"kimsufi"
+	},
+	{
+		"name":"ks6",
+		"url":"https://www.kimsufi.com/en/order/kimsufi.cgi?hard=150sk60",
+		"content":"id=\"aButtonValidation\"",
+		"issoldout":"1",
+		"matchtype":"str",
+		"tag":"kimsufi"
+	}
+
+]
+
+}
